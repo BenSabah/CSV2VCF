@@ -1,53 +1,44 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using static CSV2VCF.MainForm;
-using static CSV2VCF.VcfHandler;
 
 namespace CSV2VCF
 {
     public class VcfHandler
     {
-        static public bool VcfMaker(string i_resultsPath, VcfObject[] i_data, bool i_mergeToSingleVCard)
+        static public bool CreateMergedVcfFile(string i_pathOfSingleFile, VcfObject[] i_VcfObjects)
         {
             try
             {
-                if (i_mergeToSingleVCard)
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < i_VcfObjects.Length; i++)
                 {
-                    createSingleVCard(i_resultsPath, i_data);
+                    sb.Append(i_VcfObjects[i].CreateVcfDataString());
                 }
-                else
+                Utils.writeDataToFile(i_pathOfSingleFile, sb.ToString());
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        static public bool CreateMultipleVcfFiles(string i_pathOfFolderForFiles, VcfObject[] i_VcfObjects)
+        {
+            try
+            {
+                Directory.CreateDirectory(i_pathOfFolderForFiles);
+                foreach (VcfObject currentVcfObj in i_VcfObjects)
                 {
-                    createMultipleVCards(i_resultsPath, i_data);
+                    string path = Path.Combine(i_pathOfFolderForFiles, currentVcfObj.GetName() + ".vcf");
+                    Utils.writeDataToFile(path, currentVcfObj.CreateVcfDataString());
                 }
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
-                throw e;
-            }
-        }
-
-        private static void createSingleVCard(string i_pathOfSingleFile, VcfObject[] i_VcfObjects)
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (VcfObject currentVcfObj in i_VcfObjects)
-            {
-                sb.Append(currentVcfObj.CreateVcfDataString());
-            }
-            Utils.writeDataToFile(sb.ToString(), i_pathOfSingleFile);
-        }
-
-        private static void createMultipleVCards(string i_pathOfTheFilesDirectory, VcfObject[] i_VcfObjects)
-        {
-            Directory.CreateDirectory(i_pathOfTheFilesDirectory);
-            foreach (VcfObject currentVcfObj in i_VcfObjects)
-            {
-                string path = Path.Combine(i_pathOfTheFilesDirectory, currentVcfObj.GetName() + ".vcf");
-                Utils.writeDataToFile(currentVcfObj.CreateVcfDataString(), path);
             }
         }
     }

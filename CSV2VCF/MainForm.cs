@@ -1,11 +1,6 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using Microsoft.VisualBasic;
 using System.Diagnostics;
-using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace CSV2VCF
 {
@@ -22,8 +17,6 @@ namespace CSV2VCF
 
             InitializeComponent();
             if (i_data != null) { updateTableData(i_data); }
-            var windowClipboardManager = new ClipboardManager(this);
-            windowClipboardManager.ClipboardChanged += ClipboardChanged;
         }
 
         private void ClipboardChanged(object sender, EventArgs e)
@@ -31,7 +24,7 @@ namespace CSV2VCF
             // Handle your clipboard update here, debug logging example:
             if (Clipboard.ContainsText())
             {
-                Debug.WriteLine(Clipboard.GetText());
+                //Console.WriteLine(Clipboard.GetText());
             }
         }
 
@@ -65,41 +58,43 @@ namespace CSV2VCF
             string outputPath = path.Substring(0, path.LastIndexOf('.'));
             bool mergeToSingleFile = Checkbox_MergeVCFs.Checked;
 
-            if (mergeToSingleFile)
-            {
-                path += ".vcf";
-            }
-
-            VcfObject[] VCFs = convertTableToVcfObjects(m_tableData);
-            string result = "";
+            VcfObject[] VcfObjects = convertTableToVcfObjects(m_tableData);
+            string result = string.Empty;
+            bool operationSuccefull = false;
 
             try
             {
-                bool operationSuccefull = VcfHandler.VcfMaker(outputPath, VCFs, mergeToSingleFile);
-
-                if (operationSuccefull)
+                if (mergeToSingleFile)
                 {
-                    if (mergeToSingleFile)
-                    {
-                        result = "Created VCF file:\n" + outputPath;
-                        MessageBox.Show(result, "Operation Passed", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        result = "Created VCF files in:\n" + outputPath;
-                        MessageBox.Show(result, "Operation Passed", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-
-                    MessageBox.Show(result, "Operation Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    outputPath += ".vcf";
+                    result = "Created VCF file:\n" + outputPath;
+                    operationSuccefull = VcfHandler.CreateMergedVcfFile(outputPath, VcfObjects);
+                }
+                else
+                {
+                    result = "Created VCF files in:\n" + outputPath;
+                    operationSuccefull = VcfHandler.CreateMultipleVcfFiles(outputPath, VcfObjects);
                 }
             }
             catch (Exception ex)
             {
                 result = Utils.flattenedException(ex);
-                MessageBox.Show(result, "Operation Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
+            displayResult(operationSuccefull, result);
             Trace.WriteLine(result);
+        }
+
+        private void displayResult(bool operationSuccefull, string result)
+        {
+            if (operationSuccefull)
+            {
+                MessageBox.Show(result, "Operation Passed", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show(result, "Operation Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void updateSelectors(string[] i_dropdownChoices)
@@ -113,7 +108,7 @@ namespace CSV2VCF
         private void updateTableData(string[][] i_data)
         {
             clearDataGridViewRow();
-            this.m_tableData = i_data;
+            m_tableData = i_data;
 
             for (int y = 0; y < m_tableData.Length; y++)
             {
@@ -145,10 +140,9 @@ namespace CSV2VCF
 
         private VcfObject[] convertTableToVcfObjects(string[][] data)
         {
-            int lines = data.GetUpperBound(0);
             VcfObject[] VCFs = new VcfObject[data.Length];
 
-            for (int i = 0; i < lines; i++)
+            for (int i = 0; i < data.Length; i++)
             {
                 VCFs[i] = new VcfObject(data[i][0], data[i][1]);
             }

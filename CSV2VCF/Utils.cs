@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
@@ -61,7 +61,15 @@ namespace CSV2VCF
 
         public static void writeDataToFile(string path, string FileData)
         {
-            File.WriteAllText(path, FileData);
+            try
+            {
+                File.WriteAllText(path, FileData);
+                Trace.WriteLine(path);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(flattenedException(e));
+            }
         }
 
         public static string flattenedException(Exception e)

@@ -45,6 +45,7 @@
     <Reference Include="System.Deployment" />
     <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -66,6 +67,7 @@
     <Compile Include="VcfHandler.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="VcfObject.cs" />
+    <Compile Include="VcfProperties.cs" />
     <EmbeddedResource Include="ClipboardPaster.resx">
       <DependentUpon>ClipboardPaster.cs</DependentUpon>
     </EmbeddedResource>

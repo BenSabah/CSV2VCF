@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CSV2VCF
 {
     public class VcfObject
     {
+        //TODO add sanitation of "\n" ":" etc...
 
         static string Vcf_Format = @"" +
          "BEGIN:VCARD\r\n" +
@@ -13,54 +15,50 @@ namespace CSV2VCF
          "TEL;TYPE=cell,voice;VALUE=uri:{1}\r\n" +
          "END:VCARD\r\n";
 
-        public enum VcfProperties
-        {
-            e_title,
-            e_Name,
-            e_Number
-        }
+        Dictionary<string, string> vcfData;
 
-        Dictionary<VcfProperties, string> vcfData;
-
-        public VcfObject(Dictionary<VcfProperties, string> i_vcfData)
+        public VcfObject(Dictionary<string, string> i_vcfData)
         {
-            vcfData = new Dictionary<VcfProperties, string>(i_vcfData);
+            vcfData = new Dictionary<string, string>(i_vcfData);
         }
 
         public VcfObject(string name, string number)
         {
-            vcfData = new Dictionary<VcfProperties, string>();
-            SetValue(VcfProperties.e_Name, name);
-            SetValue(VcfProperties.e_Number, number);
+
+
         }
 
-        public void SetValue(VcfProperties prop, string value)
+        private void SetValue(object title, string name)
         {
-            vcfData.Add(prop, value);
+            throw new NotImplementedException();
         }
 
-        public bool TryGetValue(VcfProperties prop, out string value)
+        public void SetValue(VcfProperty prop, string value)
         {
-            return vcfData.TryGetValue(prop, out value);
+        }
+
+        public bool TryGetValue(VcfProperty prop, out string value)
+        {
+            value = "";
+            return false;
         }
 
         public string GetName()
         {
-            TryGetValue(VcfProperties.e_Name, out string name);
-            return name;
+            return "";
         }
 
         public string GetNumber()
         {
-            TryGetValue(VcfProperties.e_Number, out string number);
-            return number;
+            return "";
         }
 
         public string CreateVcfDataString()
         {
+
             return string.Format(Vcf_Format, GetName(), GetNumber());
         }
-        
+
         public override string ToString()
         {
             return GetName() + " > " + GetNumber();
